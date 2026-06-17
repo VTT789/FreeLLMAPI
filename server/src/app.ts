@@ -15,7 +15,6 @@ import { analyticsRouter } from './routes/analytics.js';
 import { healthRouter } from './routes/health.js';
 import { settingsRouter } from './routes/settings.js';
 import { premiumRouter } from './routes/premium.js';
-import { authRouter } from './routes/auth.js';
 
 import { createProxyRateLimiter } from './middleware/rateLimit.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -29,28 +28,26 @@ export function createApp() {
   const app = express();
 
 
-  // Security
   app.use(
     helmet({
-      contentSecurityPolicy: false,
-      hsts: false
+      contentSecurityPolicy:false,
+      hsts:false
     })
   );
 
 
-  // CORS FIX
-  // Allow HTML / GitHub Pages / localhost testing
+  // Allow all frontend testing
   app.use(
     cors({
-      origin: true,
-      methods: [
+      origin:true,
+      methods:[
         'GET',
         'POST',
         'PUT',
         'DELETE',
         'OPTIONS'
       ],
-      allowedHeaders: [
+      allowedHeaders:[
         'Content-Type',
         'Authorization'
       ]
@@ -60,29 +57,64 @@ export function createApp() {
 
   app.use(
     express.json({
-      limit: '10mb'
+      limit:'10mb'
     })
   );
 
 
-  // Auth
-  app.use('/api/auth', authRouter);
+  /*
+    DISABLED LOGIN SYSTEM
+    No create account
+    No dashboard auth
+  */
 
 
-  // Dashboard API
-app.use('/api/keys', keysRouter);
-app.use('/api/models', modelsRouter);
-app.use('/api/profiles', profilesRouter);
-app.use('/api/fallback', fallbackRouter);
-app.use('/api/embeddings', embeddingsRouter);
-app.use('/api/analytics', analyticsRouter);
-app.use('/api/health', healthRouter);
-app.use('/api/settings', settingsRouter);
-app.use('/api/premium', premiumRouter);
+  // Fake auth status so frontend thinks setup is complete
+  app.get('/api/auth/status', (_req,res)=>{
+    res.json({
+      setup:true,
+      authenticated:true
+    });
+  });
 
 
-  // OpenAI compatible API
-  app.use('/v1', createProxyRateLimiter());
+  app.post('/api/auth/setup', (_req,res)=>{
+    res.json({
+      success:true
+    });
+  });
+
+
+  app.post('/api/auth/login', (_req,res)=>{
+    res.json({
+      success:true,
+      token:"disabled-auth"
+    });
+  });
+
+
+
+  // API routes without requireAuth
+
+  app.use('/api/keys', keysRouter);
+  app.use('/api/models', modelsRouter);
+  app.use('/api/profiles', profilesRouter);
+  app.use('/api/fallback', fallbackRouter);
+  app.use('/api/embeddings', embeddingsRouter);
+  app.use('/api/analytics', analyticsRouter);
+  app.use('/api/health', healthRouter);
+  app.use('/api/settings', settingsRouter);
+  app.use('/api/premium', premiumRouter);
+
+
+
+  // OpenAI API
+
+  app.use(
+    '/v1',
+    createProxyRateLimiter()
+  );
+
 
   app.use('/v1', proxyRouter);
 
@@ -90,28 +122,33 @@ app.use('/api/premium', premiumRouter);
 
 
 
-  // Test endpoint
-  app.get('/api/ping', (_req,res)=>{
+  app.get('/api/ping',(req,res)=>{
+
     res.json({
       status:'ok',
-      timestamp:new Date().toISOString()
+      time:new Date()
     });
+
   });
 
 
 
-  // Error handler
   app.use(errorHandler);
 
 
 
-  // Frontend
-  const clientDist = process.env.CLIENT_DIST
+  // React frontend
+
+  const clientDist =
+    process.env.CLIENT_DIST
     ? path.resolve(process.env.CLIENT_DIST)
     : path.resolve(__dirname,'../../client/dist');
 
 
-  app.use(express.static(clientDist));
+  app.use(
+    express.static(clientDist)
+  );
+
 
 
   app.use((req,res,next)=>{
@@ -124,11 +161,16 @@ app.use('/api/premium', premiumRouter);
       return;
     }
 
+
     res.sendFile(
-      path.join(clientDist,'index.html')
+      path.join(
+        clientDist,
+        'index.html'
+      )
     );
 
   });
+
 
 
   return app;
