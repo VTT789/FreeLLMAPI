@@ -1,9 +1,9 @@
 ﻿{
   "name": "@freellmapi/server",
   "version": "0.2.1",
+  "type": "module",
   "scripts": {
-    "start": "node dist/index.js",
-    "build": "npx tsc --skipLibCheck --noImplicitAny false --strictNullChecks false --outDir dist || echo 'Build complete with warnings'",
+    "start": "tsx src/index.ts",
     "dev": "tsx watch src/index.ts",
     "test": "vitest"
   },

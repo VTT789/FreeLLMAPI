@@ -14,5 +14,5 @@ RUN npm install
 # Expose the port
 EXPOSE 3001
 
-# Run directly with tsx (no build needed)
+# Run with tsx
 CMD ["npx", "tsx", "server/src/index.ts"]
