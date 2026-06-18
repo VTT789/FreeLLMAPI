@@ -11,10 +11,11 @@
     "esModuleInterop": true,
     "allowJs": true,
     "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
     "paths": {
       "@freellmapi/shared/*": ["../shared/*"]
     }
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "src/__tests__"]
+  "exclude": ["node_modules", "dist", "src/__tests__", "src/scripts/**/*"]
 }

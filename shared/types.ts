@@ -1,4 +1,5 @@
-﻿export interface Model {
+﻿// Basic types
+export interface Model {
   id: string;
   name: string;
   provider: string;
@@ -36,4 +37,82 @@ export interface Analytics {
   latency_ms: number;
   success: boolean;
   error_message?: string;
+}
+
+// Additional types needed by the server
+export interface ModelListRow {
+  id: string;
+  model_id: string;
+  provider: string;
+  display_name: string;
+  context_length?: number;
+  max_tokens?: number;
+  input_price_per_1k?: number;
+  output_price_per_1k?: number;
+  is_active: boolean;
+}
+
+export interface ChatMessage {
+  role: 'system' | 'user' | 'assistant' | 'tool';
+  content: string;
+  name?: string;
+  tool_calls?: ChatToolCall[];
+  tool_call_id?: string;
+}
+
+export interface ChatToolCall {
+  id: string;
+  type: 'function';
+  function: {
+    name: string;
+    arguments: string;
+  };
+}
+
+export interface ChatToolDefinition {
+  type: 'function';
+  function: {
+    name: string;
+    description?: string;
+    parameters?: Record<string, any>;
+  };
+}
+
+export type ChatToolChoice = 'none' | 'auto' | { type: 'function'; function: { name: string } };
+
+export interface Platform {
+  id: string;
+  name: string;
+  type: string;
+  enabled: boolean;
+  config?: Record<string, any>;
+}
+
+export interface KeyStatus {
+  key: string;
+  provider: string;
+  valid: boolean;
+  last_checked?: string;
+  error?: string;
+}
+
+export interface Quirk {
+  id: string;
+  model_id: string;
+  severity: QuirkSeverity;
+  target: QuirkTarget;
+  description: string;
+  fix?: string;
+}
+
+export type QuirkSeverity = 'low' | 'medium' | 'high' | 'critical';
+export type QuirkTarget = 'prompt' | 'response' | 'both';
+
+export interface QuirkDefinition {
+  id: string;
+  model_id: string;
+  severity: QuirkSeverity;
+  target: QuirkTarget;
+  description: string;
+  fix?: string;
 }
