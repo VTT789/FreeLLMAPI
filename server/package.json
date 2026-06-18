@@ -11,7 +11,9 @@
     "better-sqlite3": "^11.0.0",
     "cors": "^2.8.5",
     "express": "^4.18.2",
-    "helmet": "^7.1.0"
+    "helmet": "^7.1.0",
+    "undici": "^6.0.0",
+    "socks-proxy-agent": "^8.0.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.8",
