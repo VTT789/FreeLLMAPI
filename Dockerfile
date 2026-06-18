@@ -1,11 +1,18 @@
 ﻿FROM node:20-alpine
 
+# Install Python and build tools
+RUN apk add --no-cache python3 make g++ && \
+    ln -sf python3 /usr/bin/python
+
 WORKDIR /app
 
 # Copy all source code
 COPY . .
 
-# Install all dependencies (workspaces will be handled by npm)
+# Set Python environment variable
+ENV PYTHON=/usr/bin/python3
+
+# Install dependencies
 RUN npm install
 
 # Build the application
