@@ -36,12 +36,10 @@ export function initDb(dbPath?: string): Database.Database {
 
   db.pragma('foreign_keys = ON');
   migrateDbSchema(db);
-
   console.log(`Database initialized at ${resolvedPath}`);
   return db;
 }
 
-// --- Your existing functions (kept as is) ---
 export function getUnifiedApiKey(): string {
   const row = getDb()
     .prepare("SELECT value FROM settings WHERE key = 'unified_api_key'")
@@ -75,103 +73,180 @@ export function setSetting(key: string, value: string): void {
     .run(key, value);
 }
 
-// --- NEW: API Fetching and Parsing Logic ---
+// Function to find header and rows from the API data
+export function findHeaderAndRows(
+  data: any[],
+  headerName: string,
+  columnIndices: number[]
+): { header: string; rows: any[] } {
+  if (!data || data.length === 0) {
+    return { header: '', rows: [] };
+  }
 
-/**
- * Fetches data from the opensheet API and extracts the "API" column
- * from rows where columns 1 to 22 contain data.
- * 
- * @returns A promise that resolves to an array of API strings.
- * @throws Will throw an error if the fetch fails or the response is invalid.
- */
-export async function fetchApiDataFromSheet(): Promise<string[]> {
-  const sheetUrl = 'https://opensheet.elk.sh/14TIknZTVUyw40Suhj74UzgzXRZaJVX_qg17EeCBsZWM/Sheet1';
-  
-  try {
-    const response = await fetch(sheetUrl);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+  // Find the header row (first row of the data)
+  const headerRow = data[0];
+  let headerIndex = -1;
+
+  // Find the column index matching the header name
+  for (let i = 0; i < headerRow.length; i++) {
+    if (headerRow[i] && headerRow[i].toString().toLowerCase() === headerName.toLowerCase()) {
+      headerIndex = i;
+      break;
     }
+  }
 
-    const data = await response.json();
+  if (headerIndex === -1) {
+    return { header: '', rows: [] };
+  }
 
-    // Ensure the response is an array (expected format from opensheet)
-    if (!Array.isArray(data)) {
-      throw new Error('Unexpected response format: expected an array of rows.');
-    }
-
-    // Find the header row containing "API"
-    const headerRowIndex = data.findIndex(row => 
-      row && typeof row === 'object' && Object.values(row).includes('API')
-    );
-
-    if (headerRowIndex === -1) {
-      throw new Error('Could not find a header row with "API" column.');
-    }
-
-    const headerRow = data[headerRowIndex];
-    // Find the exact column key for "API"
-    const apiColumnKey = Object.keys(headerRow).find(key => headerRow[key] === 'API');
-    
-    if (!apiColumnKey) {
-      throw new Error('Could not find the "API" column in the header row.');
-    }
-
-    // Define the row range: from row after header (index 1) up to row 22 (index 21)
-    const startRowIndex = headerRowIndex + 1; // row index 1 (0-based)
-    const endRowIndex = Math.min(startRowIndex + 21, data.length - 1); // row index 22 (0-based)
-
-    const apiValues: string[] = [];
-    for (let i = startRowIndex; i <= endRowIndex; i++) {
-      const row = data[i];
-      if (row && typeof row === 'object' && row[apiColumnKey]) {
-        const value = String(row[apiColumnKey]).trim();
-        if (value) {
-          apiValues.push(value);
+  // Extract rows data based on column indices
+  const rows = [];
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    if (row && row[headerIndex]) {
+      const rowData: any = {};
+      // Extract data for specified column indices
+      for (const colIndex of columnIndices) {
+        if (colIndex < row.length) {
+          rowData[`col_${colIndex}`] = row[colIndex] || '';
         }
       }
+      rows.push(rowData);
     }
+  }
 
-    if (apiValues.length === 0) {
-      console.warn('No API values found in the specified range.');
-    } else {
-      console.log(`Successfully fetched ${apiValues.length} API values.`);
+  return { header: headerRow[headerIndex], rows };
+}
+
+// Function to fetch API data from Google Sheets
+export async function fetchApiData(): Promise<any> {
+  const url = 'https://opensheet.elk.sh/14TIknZTVUyw40Suhj74UzgzXRZaJVX_qg17EeCBsZWM/Sheet1';
+  
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch API data: ${response.statusText}`);
     }
-
-    return apiValues;
-
+    const data = await response.json();
+    return data;
   } catch (error) {
-    console.error('Failed to fetch or parse API data:', error);
-    // Re-throw or handle as needed
-    throw new Error(`Failed to fetch API data: ${error instanceof Error ? error.message : String(error)}`);
+    console.error('Error fetching API data:', error);
+    throw error;
   }
 }
 
-/**
- * Example function demonstrating how to use the fetched API data
- * with your database.
- */
-export async function refreshApiKeysFromSheet(): Promise<void> {
+// Function to fetch and store API keys from Google Sheets
+export async function fetchAndStoreApiKeys(): Promise<void> {
   try {
-    const apiKeys = await fetchApiDataFromSheet();
-    const db = getDb();
+    const data = await fetchApiData();
+    if (!data || data.length === 0) {
+      console.error('No data received from Google Sheets');
+      return;
+    }
 
-    // Example: Store the keys in a table (you'll need to create this table)
-    // For demonstration, we just print them.
-    console.log('API Keys from sheet:');
-    apiKeys.forEach((key, index) => {
-      console.log(`${index + 1}: ${key}`);
+    // Define all API providers and their column configurations
+    const apiProviders = [
+      { name: 'google', colIndex: 3, key: 'google_api_key' },
+      { name: 'groq', colIndex: 4, key: 'groq_api_key' },
+      { name: 'cerebras', colIndex: 5, key: 'cerebras_api_key' },
+      { name: 'nvidia', colIndex: 6, key: 'nvidia_api_key' },
+      { name: 'mistral', colIndex: 7, key: 'mistral_api_key' },
+      { name: 'openrouter', colIndex: 8, key: 'openrouter_api_key' },
+      { name: 'github', colIndex: 9, key: 'github_api_key' },
+      { name: 'cohere', colIndex: 10, key: 'cohere_api_key' },
+      { name: 'cloudflare', colIndex: 11, key: 'cloudflare_api_key' },
+      { name: 'zhipu', colIndex: 12, key: 'zhipu_api_key' },
+      { name: 'ollama', colIndex: 13, key: 'ollama_api_key' },
+      { name: 'kilo', colIndex: 14, key: 'kilo_api_key' },
+      { name: 'pollinations', colIndex: 15, key: 'pollinations_api_key' },
+      { name: 'llm7', colIndex: 16, key: 'llm7_api_key' },
+      { name: 'huggingface', colIndex: 17, key: 'huggingface_api_key' },
+      { name: 'opencode', colIndex: 18, key: 'opencode_api_key' },
+      { name: 'ovh', colIndex: 19, key: 'ovh_api_key' },
+      { name: 'agnes', colIndex: 20, key: 'agnes_api_key' },
+      { name: 'custom', colIndex: 21, key: 'custom_api_key' }
+    ];
+
+    // Process each API provider
+    for (const provider of apiProviders) {
+      const result = findHeaderAndRows(data, 'API', [1, provider.colIndex]);
       
-      // Example: Insert or update a key-value pair in settings
-      // setSetting(`api_key_${index + 1}`, key);
-    });
+      if (result.header && result.rows.length > 0) {
+        // Extract API key from the first valid row
+        const firstRow = result.rows[0];
+        const apiKey = firstRow[`col_${provider.colIndex}`];
+        
+        if (apiKey && apiKey.trim() !== '') {
+          // Store in database
+          setSetting(provider.key, apiKey.trim());
+          console.log(`✅ Stored ${provider.name} API key`);
+        } else {
+          console.log(`⚠️ No API key found for ${provider.name}`);
+        }
+      } else {
+        console.log(`⚠️ No data found for ${provider.name}`);
+      }
+    }
 
-    // You could also store all keys as a JSON array in a single setting
-    setSetting('all_api_keys', JSON.stringify(apiKeys));
-    
+    console.log('✅ All API keys fetched and stored successfully');
   } catch (error) {
-    console.error('Failed to refresh API keys:', error);
+    console.error('❌ Error fetching and storing API keys:', error);
     throw error;
+  }
+}
+
+// Function to get a specific API key
+export function getApiKey(provider: string): string | undefined {
+  const keyMap: { [key: string]: string } = {
+    google: 'google_api_key',
+    groq: 'groq_api_key',
+    cerebras: 'cerebras_api_key',
+    nvidia: 'nvidia_api_key',
+    mistral: 'mistral_api_key',
+    openrouter: 'openrouter_api_key',
+    github: 'github_api_key',
+    cohere: 'cohere_api_key',
+    cloudflare: 'cloudflare_api_key',
+    zhipu: 'zhipu_api_key',
+    ollama: 'ollama_api_key',
+    kilo: 'kilo_api_key',
+    pollinations: 'pollinations_api_key',
+    llm7: 'llm7_api_key',
+    huggingface: 'huggingface_api_key',
+    opencode: 'opencode_api_key',
+    ovh: 'ovh_api_key',
+    agnes: 'agnes_api_key',
+    custom: 'custom_api_key'
+  };
+
+  const settingKey = keyMap[provider.toLowerCase()];
+  if (!settingKey) {
+    return undefined;
+  }
+
+  return getSetting(settingKey);
+}
+
+// Function to refresh API keys from Google Sheets
+export async function refreshApiKeys(): Promise<void> {
+  console.log('🔄 Refreshing API keys from Google Sheets...');
+  await fetchAndStoreApiKeys();
+}
+
+// Function to initialize the database with default API keys
+export function initializeApiKeys(): void {
+  console.log('🔑 Initializing API keys...');
+  
+  // Check if we have any API keys stored
+  const sampleKey = getSetting('google_api_key');
+  
+  if (!sampleKey) {
+    console.log('📡 No API keys found. Fetching from Google Sheets...');
+    // Fetch asynchronously but don't block initialization
+    fetchAndStoreApiKeys().catch(error => {
+      console.error('Failed to fetch API keys:', error);
+    });
+  } else {
+    console.log('✅ API keys already initialized');
   }
 }
