@@ -11,14 +11,8 @@ COPY . .
 # Install dependencies
 RUN npm install
 
-# Build shared
-RUN cd shared && npm run build || true
-
-# Build server
-RUN cd server && npm run build || true
-
 # Expose the port
 EXPOSE 3001
 
-# Start the server directly
-CMD ["node", "server/dist/index.js"]
+# Run directly with tsx (no build needed)
+CMD ["npx", "tsx", "server/src/index.ts"]
