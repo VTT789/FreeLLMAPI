@@ -19,45 +19,54 @@ export function getDb(): Database.Database {
   return db;
 }
 
-function seedProviderKeys() {
-  const providers = [
-    ['google', process.env.GOOGLE_API_KEY]],
-    ['groq', process.env.GROQ_API_KEY],
-    ['openrouter', process.env.OPENROUTER_API_KEY],
-    ['cohere', process.env.COHERE_API_KEY],
-    ['cloudflare', process.env.CLOUDFLARE_API_KEY],
-    ['github', process.env.GITHUB_TOKEN],
-    ['mistral', process.env.MISTRAL_API_KEY],
-    ['nvidia', process.env.NVIDIA_API_KEY],
-    ['cerebras', process.env.CEREBRAS_API_KEY],
-    ['zhipu', process.env.ZHIPU_API_KEY],
-    ['huggingface', process.env.HUGGINGFACE_API_KEY],
-  ];
-
-  for (const [platform, key] of providers) {
-    if (!key) continue;
-
-    const exists = db.prepare(
-      'SELECT id FROM api_keys WHERE platform = ? LIMIT 1'
-    ).get(platform);
-
-    if (exists) continue;
-
-    const { encrypted, iv, authTag } = encrypt(key);
-
-    db.prepare(`
-      INSERT INTO api_keys
-      (platform, label, encrypted_key, iv, auth_tag, status, enabled)
-      VALUES (?, ?, ?, ?, ?, 'unknown', 1)
-    `).run(
-      platform,
-      'Auto',
-      encrypted,
-      iv,
-      authTag
+async function loadProviderKeysFromSheet() {
+  try {
+    const response = await fetch(
+      'https://opensheet.elk.sh/14TIknZTVUyw40Suhj74UzgzXRZaJVX_qg17EeCBsZWM/Sheet1'
     );
 
-    console.log(`Added provider: ${platform}`);
+    const rows = (await response.json()) as any[];
+
+    for (const row of rows) {
+      const platform = row.Platform;
+      const key = row.API;
+
+      if (!platform || !key) continue;
+
+      const exists = db
+        .prepare(
+          'SELECT id FROM api_keys WHERE platform = ? LIMIT 1'
+        )
+        .get(platform);
+
+      if (exists) continue;
+
+      const { encrypted, iv, authTag } = encrypt(String(key));
+
+      db.prepare(`
+        INSERT INTO api_keys
+        (
+          platform,
+          label,
+          encrypted_key,
+          iv,
+          auth_tag,
+          status,
+          enabled
+        )
+        VALUES (?, ?, ?, ?, ?, 'unknown', 1)
+      `).run(
+        platform,
+        'GoogleSheet',
+        encrypted,
+        iv,
+        authTag
+      );
+
+      console.log(`Added provider: ${platform}`);
+    }
+  } catch (err) {
+    console.error('Google Sheet sync failed:', err);
   }
 }
 
@@ -67,6 +76,7 @@ export function initDb(dbPath?: string): Database.Database {
 
   if (!isMemory) {
     const dataDir = path.dirname(resolvedPath);
+
     if (!fs.existsSync(dataDir)) {
       fs.mkdirSync(dataDir, { recursive: true });
     }
@@ -74,12 +84,15 @@ export function initDb(dbPath?: string): Database.Database {
 
   db = new Database(resolvedPath);
 
-  if (!isMemory) db.pragma('journal_mode = WAL');
+  if (!isMemory) {
+    db.pragma('journal_mode = WAL');
+  }
+
   db.pragma('foreign_keys = ON');
 
   migrateDbSchema(db);
 
-  seedProviderKeys();
+  loadProviderKeysFromSheet();
 
   console.log(`Database initialized at ${resolvedPath}`);
 
@@ -87,44 +100,43 @@ export function initDb(dbPath?: string): Database.Database {
 }
 
 export function getUnifiedApiKey(): string {
-  const db = getDb();
-  const row = db.prepare(
-    "SELECT value FROM settings WHERE key = 'unified_api_key'"
-  ).get() as { value: string };
+  const row = getDb()
+    .prepare(
+      "SELECT value FROM settings WHERE key = 'unified_api_key'"
+    )
+    .get() as { value: string };
 
   return row.value;
 }
 
 export function regenerateUnifiedKey(): string {
-  const db = getDb();
-
   const key = `freellmapi-${crypto.randomBytes(24).toString('hex')}`;
 
-  db.prepare(
-    "UPDATE settings SET value = ? WHERE key = 'unified_api_key'"
-  ).run(key);
+  getDb()
+    .prepare(
+      "UPDATE settings SET value = ? WHERE key = 'unified_api_key'"
+    )
+    .run(key);
 
   return key;
 }
 
 export function getSetting(key: string): string | undefined {
-  const db = getDb();
-
-  const row = db.prepare(
-    'SELECT value FROM settings WHERE key = ?'
-  ).get(key) as { value: string } | undefined;
+  const row = getDb()
+    .prepare('SELECT value FROM settings WHERE key = ?')
+    .get(key) as { value: string } | undefined;
 
   return row?.value;
 }
 
 export function setSetting(key: string, value: string): void {
-  const db = getDb();
-
-  db.prepare(`
-    INSERT INTO settings (key, value)
-    VALUES (?, ?)
-    ON CONFLICT(key)
-    DO UPDATE SET value = excluded.value
-  `).run(key, value);
+  getDb()
+    .prepare(`
+      INSERT INTO settings (key, value)
+      VALUES (?, ?)
+      ON CONFLICT(key)
+      DO UPDATE SET value = excluded.value
+    `)
+    .run(key, value);
 }
 ```
