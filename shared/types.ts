@@ -39,7 +39,6 @@ export interface Analytics {
   error_message?: string;
 }
 
-// Additional types needed by the server
 export interface ModelListRow {
   id: string;
   model_id: string;
@@ -103,9 +102,13 @@ export interface Quirk {
   target: QuirkTarget;
   description: string;
   fix?: string;
+  slug?: string;
+  title?: string;
+  body?: string;
 }
 
 export type QuirkSeverity = 'low' | 'medium' | 'high' | 'critical';
+
 export type QuirkTarget = 'prompt' | 'response' | 'both';
 
 export interface QuirkDefinition {
@@ -115,4 +118,14 @@ export interface QuirkDefinition {
   target: QuirkTarget;
   description: string;
   fix?: string;
+  slug?: string;
+  title?: string;
+  body?: string;
+}
+
+export interface QuirkSeverityCount {
+  blocker?: number;
+  high?: number;
+  medium?: number;
+  low?: number;
 }
