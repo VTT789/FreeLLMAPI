@@ -1,11 +1,9 @@
-```ts
 import crypto from 'crypto';
 import Database from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { migrateDbSchema } from './migrations.js';
-import { encrypt } from '../lib/crypto.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DB_PATH = path.resolve(__dirname, '../../data/freeapi.db');
@@ -17,57 +15,6 @@ export function getDb(): Database.Database {
     throw new Error('Database not initialized. Call initDb() first.');
   }
   return db;
-}
-
-async function loadProviderKeysFromSheet() {
-  try {
-    const response = await fetch(
-      'https://opensheet.elk.sh/14TIknZTVUyw40Suhj74UzgzXRZaJVX_qg17EeCBsZWM/Sheet1'
-    );
-
-    const rows = (await response.json()) as any[];
-
-    for (const row of rows) {
-      const platform = row.Platform;
-      const key = row.API;
-
-      if (!platform || !key) continue;
-
-      const exists = db
-        .prepare(
-          'SELECT id FROM api_keys WHERE platform = ? LIMIT 1'
-        )
-        .get(platform);
-
-      if (exists) continue;
-
-      const { encrypted, iv, authTag } = encrypt(String(key));
-
-      db.prepare(`
-        INSERT INTO api_keys
-        (
-          platform,
-          label,
-          encrypted_key,
-          iv,
-          auth_tag,
-          status,
-          enabled
-        )
-        VALUES (?, ?, ?, ?, ?, 'unknown', 1)
-      `).run(
-        platform,
-        'GoogleSheet',
-        encrypted,
-        iv,
-        authTag
-      );
-
-      console.log(`Added provider: ${platform}`);
-    }
-  } catch (err) {
-    console.error('Google Sheet sync failed:', err);
-  }
 }
 
 export function initDb(dbPath?: string): Database.Database {
@@ -91,8 +38,6 @@ export function initDb(dbPath?: string): Database.Database {
   db.pragma('foreign_keys = ON');
 
   migrateDbSchema(db);
-
-  loadProviderKeysFromSheet();
 
   console.log(`Database initialized at ${resolvedPath}`);
 
@@ -139,4 +84,3 @@ export function setSetting(key: string, value: string): void {
     `)
     .run(key, value);
 }
-```
