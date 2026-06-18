@@ -1,22 +1,18 @@
 ﻿{
   "compilerOptions": {
     "target": "ES2020",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "declaration": true,
+    "module": "commonjs",
     "outDir": "./dist",
     "strict": false,
     "noImplicitAny": false,
     "strictNullChecks": false,
-    "strictFunctionTypes": false,
-    "strictPropertyInitialization": false,
-    "noImplicitThis": false,
-    "alwaysStrict": false,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowJs": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
+    "lib": ["ES2021"],
+    "baseUrl": ".",
     "paths": {
       "@freellmapi/shared/*": ["../shared/*"]
     }
