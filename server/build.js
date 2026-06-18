@@ -1,15 +1,38 @@
-﻿const esbuild = require('esbuild');
+﻿// build.js - Simple copy script
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-esbuild.build({
-  entryPoints: ['src/index.ts'],
-  bundle: true,
-  platform: 'node',
-  target: 'node20',
-  outfile: 'dist/index.js',
-  format: 'esm',
-  packages: 'external',
-  external: ['better-sqlite3', 'cors', 'express', 'helmet', 'undici', 'socks-proxy-agent'],
-  loader: { '.ts': 'ts' },
-  resolveExtensions: ['.ts', '.js'],
-  logLevel: 'info'
-}).catch(() => process.exit(1));
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const srcDir = path.join(__dirname, 'src');
+const destDir = path.join(__dirname, 'dist');
+
+// Create dist directory
+if (!fs.existsSync(destDir)) {
+  fs.mkdirSync(destDir, { recursive: true });
+}
+
+// Copy all .ts files to .js
+function copyDir(src, dest) {
+  if (!fs.existsSync(dest)) {
+    fs.mkdirSync(dest, { recursive: true });
+  }
+  
+  const entries = fs.readdirSync(src, { withFileTypes: true });
+  
+  for (const entry of entries) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+    
+    if (entry.isDirectory()) {
+      copyDir(srcPath, destPath);
+    } else if (entry.name.endsWith('.ts')) {
+      const destFile = destPath.replace(/\.ts$/, '.js');
+      fs.copyFileSync(srcPath, destFile);
+      console.log(Copied:  -> );
+    }
+  }
+}
+
+copyDir(srcDir, destDir);
+console.log('Build complete!');
