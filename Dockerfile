@@ -1,27 +1,32 @@
-﻿FROM node:20-alpine
+﻿FROM node:20-alpine AS builder
 
-# Install build dependencies for better-sqlite3
+# Install build dependencies
 RUN apk add --no-cache python3 make g++
 
 WORKDIR /app
 
-# Copy all package.json files first
-COPY package*.json ./
-COPY server/package*.json ./server/
-COPY client/package*.json ./client/
-COPY shared/package*.json ./shared/ 2>/dev/null || true
+# Copy all source code
+COPY . .
 
 # Install dependencies
 RUN npm install
 
-# Copy all source code
-COPY . .
-
-# Build the shared package first (if it exists)
+# Build shared package if it exists
 RUN if [ -d shared ]; then (cd shared && npm run build || true); fi
 
 # Build the application
 RUN npm run build
+
+# Production stage
+FROM node:20-alpine
+
+# Install Python for better-sqlite3 runtime
+RUN apk add --no-cache python3
+
+WORKDIR /app
+
+# Copy from builder
+COPY --from=builder /app ./
 
 # Expose the port
 EXPOSE 3001
