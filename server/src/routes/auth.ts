@@ -1,4 +1,4 @@
-import { Router } from 'express';
+﻿import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
 import {
@@ -117,3 +117,4 @@ authRouter.get('/me', (req: Request, res: Response) => {
   }
   res.json({ email: session.email });
 });
+

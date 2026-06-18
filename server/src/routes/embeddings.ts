@@ -1,4 +1,4 @@
-import { Router } from 'express';
+﻿import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
 import { getDb, setSetting } from '../db/index.js';
@@ -107,3 +107,5 @@ embeddingsRouter.get('/usage', (_req: Request, res: Response) => {
     })),
   });
 });
+
+

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * export-catalog — build the signed catalog product from the live freeapi DB.
  *
  * This is the single source of truth pipeline: every model and its resolved
@@ -147,3 +147,5 @@ function main() {
 }
 
 main();
+
+

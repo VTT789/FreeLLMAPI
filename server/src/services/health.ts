@@ -1,4 +1,4 @@
-import { getDb } from '../db/index.js';
+﻿import { getDb } from '../db/index.js';
 import { resolveProvider } from '../providers/index.js';
 import { decrypt } from '../lib/crypto.js';
 import type { Platform, KeyStatus } from '@freellmapi/shared/types.js';
@@ -79,3 +79,6 @@ export function stopHealthChecker(): void {
     intervalId = null;
   }
 }
+
+
+

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Probe every enabled model with a minimal request to find broken model IDs.
  * Usage: npx tsx src/scripts/test-all-models.ts
  */
@@ -66,3 +66,5 @@ const okCount = results.filter(r => r.ok).length;
 console.log(`\n${okCount}/${results.length} models working\n`);
 
 process.exit(0);
+
+

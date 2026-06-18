@@ -1,4 +1,4 @@
-import type { ChatMessage } from '@freellmapi/shared/types.js';
+﻿import type { ChatMessage } from '@freellmapi/shared/types.js';
 import { contentToString } from '../lib/content.js';
 
 export type ContextHandoffMode = 'off' | 'on_model_switch';
@@ -186,3 +186,5 @@ export function recordSuccessfulModel(params: {
 export function _clearStoreForTesting(): void {
   store.clear();
 }
+
+

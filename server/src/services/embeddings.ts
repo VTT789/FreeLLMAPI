@@ -1,4 +1,4 @@
-// Embeddings routing. Unlike chat, embeddings can NOT fail over across models:
+﻿// Embeddings routing. Unlike chat, embeddings can NOT fail over across models:
 // vectors from different models live in incompatible spaces, and silently
 // switching models would corrupt any vector store built on top of us. So the
 // routing unit is a "family" (one model identity + dimension) and failover only
@@ -239,3 +239,6 @@ export async function runEmbeddings(model: string | undefined, inputs: string[])
     lastError && lastError.status === 429 ? 429 : 502,
   );
 }
+
+
+

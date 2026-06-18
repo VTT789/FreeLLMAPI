@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+﻿import crypto from 'crypto';
 import type DatabaseType from 'better-sqlite3';
 import { getDb, getSetting, setSetting } from '../db/index.js';
 import { hasProvider } from '../providers/index.js';
@@ -440,3 +440,6 @@ export function stopCatalogSync(): void {
     intervalId = null;
   }
 }
+
+
+

@@ -1,4 +1,4 @@
-import { Router } from 'express';
+﻿import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { getDb } from '../db/index.js';
 import { FALLBACK_INPUT_PER_M, FALLBACK_OUTPUT_PER_M } from '../db/model-pricing.js';
@@ -265,3 +265,5 @@ analyticsRouter.get('/errors', (req: Request, res: Response) => {
     createdAt: r.created_at,
   })));
 });
+
+

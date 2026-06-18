@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Routing simulation — exercises the real routeRequest() against an in-memory
  * DB seeded with synthetic traffic, so you can SEE how each strategy distributes
  * requests and how the bandit adapts when a model starts failing.
@@ -147,3 +147,5 @@ function main() {
 }
 
 main();
+
+

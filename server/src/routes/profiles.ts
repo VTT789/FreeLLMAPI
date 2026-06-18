@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Express router handles CRUD endpoints for named model fallback profiles.
  * Profiles allow users to maintain different prioritized chains of LLMs.
  * Features include metadata updates, reordering fallback priority, auto-sorting presets,
@@ -507,3 +507,4 @@ export function seedProfiles(db: any): void {
 
   console.log(`Seeded Default profile`);
 }
+

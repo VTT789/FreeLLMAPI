@@ -1,4 +1,4 @@
-// Sliding window rate limit tracker with SQLite persistence.
+﻿// Sliding window rate limit tracker with SQLite persistence.
 
 import { getDb } from '../db/index.js';
 
@@ -434,3 +434,6 @@ export function getRateLimitStatus(
     tpm: { used: tokenCount(platform, modelId, keyId, MINUTE, now), limit: limits.tpm },
   };
 }
+
+
+

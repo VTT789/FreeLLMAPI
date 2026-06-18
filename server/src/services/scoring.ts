@@ -1,4 +1,4 @@
-// ── Bandit routing score ────────────────────────────────────────────────────
+﻿// ── Bandit routing score ────────────────────────────────────────────────────
 //
 // A redesign of the analytics-driven router. Instead of summing a pile of
 // hand-tuned, dimensionally-incompatible bonuses (a probability + a raw latency
@@ -190,3 +190,5 @@ export function combineScore(inputs: ScoreInputs, weights: RoutingWeights): numb
       weights.intelligence * inputs.intelligence) / wSum;
   return base * inputs.headroom * inputs.rateLimit;
 }
+
+

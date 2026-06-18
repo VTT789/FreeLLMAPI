@@ -1,0 +1,18 @@
+// Auto-initialize the database when this module is imported
+let isDbInitialized = false;
+
+export function ensureDbInitialized(): void {
+  if (!isDbInitialized) {
+    try {
+      // Try to get the db, if it throws, initialize it
+      getDb();
+    } catch (e) {
+      // Database not initialized, initialize it now
+      initDb();
+    }
+    isDbInitialized = true;
+  }
+}
+
+// Initialize immediately
+ensureDbInitialized();

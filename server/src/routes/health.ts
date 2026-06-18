@@ -1,4 +1,4 @@
-import { Router } from 'express';
+﻿import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { getDb } from '../db/index.js';
 import { checkKeyHealth, checkAllKeys } from '../services/health.js';
@@ -71,3 +71,5 @@ healthRouter.post('/check-all', async (_req: Request, res: Response) => {
   await checkAllKeys();
   res.json({ success: true });
 });
+
+

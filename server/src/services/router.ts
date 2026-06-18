@@ -1,4 +1,4 @@
-import { getDb, getSetting, setSetting } from '../db/index.js';
+﻿import { getDb, getSetting, setSetting } from '../db/index.js';
 import { getProvider, hasProvider, resolveProvider } from '../providers/index.js';
 import { decrypt } from '../lib/crypto.js';
 import { canMakeRequest, canUseTokens, isOnCooldown, canUseProvider } from './ratelimit.js';
@@ -784,3 +784,6 @@ export function hasEnabledToolsModel(): boolean {
   `).get() as { cnt: number };
   return row.cnt > 0;
 }
+
+
+

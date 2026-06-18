@@ -1,4 +1,4 @@
-import { Router } from 'express';
+﻿import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { getSetting, setSetting, getDb } from '../db/index.js';
 import {
@@ -124,3 +124,5 @@ premiumRouter.post('/portal', async (_req: Request, res: Response) => {
     res.status(502).json({ error: 'Could not reach the billing service. Try again shortly.' });
   }
 });
+
+

@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+﻿import crypto from 'crypto';
 import { getDb } from '../db/index.js';
 import { hashPassword, verifyPassword } from '../lib/password.js';
 
@@ -80,3 +80,6 @@ export function deleteSession(token: string | undefined | null): void {
   if (!token) return;
   getDb().prepare('DELETE FROM sessions WHERE token_hash = ?').run(sha256(token));
 }
+
+
+

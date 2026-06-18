@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Express router handles model fallback configuration and token budget reporting.
  * It integrates named profiles dynamically into the fallback routing logic and aggregates
  * monthly token consumption and rate limits (RPM/RPD/TPM/TPD) across configured models.
@@ -284,3 +284,5 @@ fallbackRouter.get('/token-usage', (_req: Request, res: Response) => {
     models: modelBudgets,
   });
 });
+
+
