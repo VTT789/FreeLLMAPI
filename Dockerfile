@@ -1,18 +1,24 @@
 ﻿FROM node:20-alpine AS builder
 
-# Install build dependencies
+# Install build dependencies for better-sqlite3
 RUN apk add --no-cache python3 make g++
 
 WORKDIR /app
 
-# Copy all source code
-COPY . .
+# Copy all package files
+COPY package*.json ./
+COPY server/package*.json ./server/
+COPY client/package*.json ./client/
+COPY shared/package*.json ./shared/
 
 # Install dependencies
 RUN npm install
 
-# Build shared package if it exists
-RUN if [ -d shared ]; then (cd shared && npm run build || true); fi
+# Copy source code
+COPY . .
+
+# Build shared package first
+RUN cd shared && npm run build
 
 # Build the application
 RUN npm run build

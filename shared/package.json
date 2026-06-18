@@ -1,12 +1,19 @@
 ﻿{
   "name": "@freellmapi/shared",
   "version": "0.0.1",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./index.js",
-      "types": "./index.d.ts"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
   }
 }
