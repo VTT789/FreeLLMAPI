@@ -35,15 +35,14 @@ RUN npx esbuild server/src/index.ts \
     --bundle \
     --platform=node \
     --target=node20 \
-    --outfile=dist/server.cjs \
-    --format=cjs \
+    --outfile=dist/server.js \
+    --format=esm \
     --external:better-sqlite3 \
     --external:socks-proxy-agent \
     --loader:.ts=ts
-
 # Debug (remove later)
 RUN find /app -name better-sqlite3 || true
 
 EXPOSE 3001
 
-CMD ["node", "dist/server.cjs"]
+CMD ["node", "dist/server.js"]
