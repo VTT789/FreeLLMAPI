@@ -1,4 +1,11 @@
-﻿import { initDb, autoInitApiKeys, initApiKeysSync } from './db/index.js';
+﻿import { loadKeysFromEnv } from './scripts/loadKeys.js';
+
+// ... after database initialization ...
+
+// Load API keys from environment variables into the database
+loadKeysFromEnv();
+
+import { initDb, autoInitApiKeys, initApiKeysSync } from './db/index.js';
 
 // Initialize database
 const db = initDb();
