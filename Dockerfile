@@ -14,5 +14,5 @@ COPY . .
 
 EXPOSE 3001
 
-# Run directly with tsx (no build step needed)
-CMD ["npx", "tsx", "server/src/index.ts"]
+# Use node with --import to load tsx
+CMD ["node", "--import", "tsx", "server/src/index.ts"]
