@@ -1,5 +1,4 @@
-﻿import { createApp } from './app.js';
-import { initDb, autoInitApiKeys, initApiKeysSync } from './db/index.js';
+﻿import { initDb, autoInitApiKeys, initApiKeysSync } from './db/index.js';
 
 // Initialize database
 const db = initDb();
@@ -21,7 +20,10 @@ console.log('✅ Database initialized');
   }
 })();
 
+// Use dynamic import to handle both default and named exports
+const { createApp } = await import('./app.js');
 const app = createApp();
+
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
@@ -38,4 +40,3 @@ process.on('SIGINT', () => {
   console.log('🛑 Received SIGINT, shutting down gracefully...');
   process.exit(0);
 });
-
