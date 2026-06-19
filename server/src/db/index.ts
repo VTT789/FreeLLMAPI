@@ -2,10 +2,10 @@
 import Database from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
+
 import { migrateDbSchema } from '../migrations.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __dirname = process.cwd();
 const DB_PATH = path.resolve(__dirname, '../../data/freeapi.db');
 
 let db: Database.Database;
