@@ -1,4 +1,19 @@
-﻿RUN node -e "
+﻿FROM node:20-alpine
+
+RUN apk add --no-cache python3 make g++
+
+WORKDIR /app
+
+COPY package*.json ./
+COPY server/package*.json ./server/
+COPY client/package*.json ./client/
+
+RUN npm install
+
+COPY . .
+
+# Insert API keys from environment variables into the database
+RUN node -e "
 const db = require('better-sqlite3')('/app/data/freeapi.db');
 const keys = {
   google: process.env.GOOGLE_API_KEY,
@@ -25,7 +40,12 @@ db.exec('CREATE TABLE IF NOT EXISTS api_keys (id INTEGER PRIMARY KEY AUTOINCREME
 for (const [provider, key] of Object.entries(keys)) {
   if (key) {
     db.prepare('INSERT OR REPLACE INTO api_keys (provider, api_key) VALUES (?, ?)').run(provider, key);
+    console.log('Inserted ' + provider);
   }
 }
 console.log('✅ API keys loaded');
 "
+
+EXPOSE 3001
+
+CMD ["node", "--import", "tsx", "server/src/index.ts"]
