@@ -1,15 +1,15 @@
-﻿import { loadKeysFromEnv } from './scripts/loadKeys.js';
-
-// ... after database initialization ...
-
-// Load API keys from environment variables into the database
-loadKeysFromEnv();
-
-import { initDb, autoInitApiKeys, initApiKeysSync } from './db/index.js';
+﻿import { createApp } from './app.js';
+import { initDb, autoInitApiKeys, initApiKeysSync, loadKeysFromEnv, ensureTables } from './db/index.js';
 
 // Initialize database
 const db = initDb();
 console.log('✅ Database initialized');
+
+// Ensure tables exist
+ensureTables(db);
+
+// Load API keys from environment variables
+loadKeysFromEnv();
 
 // Initialize API keys from Google Sheets
 (async () => {
@@ -27,10 +27,7 @@ console.log('✅ Database initialized');
   }
 })();
 
-// Use dynamic import to handle both default and named exports
-const { createApp } = await import('./app.js');
 const app = createApp();
-
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
