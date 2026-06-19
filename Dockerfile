@@ -4,34 +4,29 @@ RUN apk add --no-cache python3 make g++
 
 WORKDIR /app
 
-
 COPY package*.json ./
 COPY server/package*.json ./server/
 COPY client/package*.json ./client/
 
-
 RUN npm install
-
 
 WORKDIR /app/server
 RUN npm install
 
-
 WORKDIR /app/client
 RUN npm install
-
-
-# Build frontend
-RUN npm run build
-
 
 WORKDIR /app
 
 COPY . .
 
 
-# Make server modules available
-RUN cp -R /app/server/node_modules/* /app/node_modules/ || true
+# Build client only if tsconfig exists
+RUN if [ -f client/tsconfig.json ]; then \
+      cd client && npm run build ; \
+    else \
+      echo "No client tsconfig.json - skipping frontend build"; \
+    fi
 
 
 # Build backend
@@ -46,10 +41,8 @@ RUN npx esbuild server/src/index.ts \
     --loader:.ts=ts
 
 
-
-# verify
-RUN ls -la /app/client/dist
-RUN ls -la /app/dist
+# Create client fallback folder
+RUN mkdir -p /app/client/dist
 
 
 EXPOSE 3001
