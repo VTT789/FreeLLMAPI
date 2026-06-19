@@ -10,12 +10,9 @@ COPY client/package*.json ./client/
 
 RUN npm install
 
-# Explicitly install server deps
-RUN cd server && npm install || true
-
 COPY . .
 
-# Build only the server – skip client
+# Build only the server – skip client completely
 RUN npx esbuild server/src/index.ts \
     --bundle \
     --platform=node \
