@@ -14,6 +14,9 @@ COPY . .
 
 RUN mkdir -p /app/data
 
+# Load keys at build time
+RUN npx tsx server/src/scripts/loadKeys.ts
+
 EXPOSE 3001
 
 CMD ["node", "--import", "tsx", "server/src/index.ts"]
