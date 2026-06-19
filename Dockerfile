@@ -5,10 +5,7 @@ RUN apk add --no-cache python3 make g++
 WORKDIR /app
 
 
-# root package
 COPY package*.json ./
-
-# workspace packages
 COPY server/package*.json ./server/
 COPY client/package*.json ./client/
 
@@ -24,16 +21,20 @@ WORKDIR /app/client
 RUN npm install
 
 
+# Build frontend
+RUN npm run build
+
+
 WORKDIR /app
 
 COPY . .
 
 
-# expose native modules
+# Make server modules available
 RUN cp -R /app/server/node_modules/* /app/node_modules/ || true
 
 
-# Build server
+# Build backend
 RUN npx esbuild server/src/index.ts \
     --bundle \
     --platform=node \
@@ -45,8 +46,10 @@ RUN npx esbuild server/src/index.ts \
     --loader:.ts=ts
 
 
-# check output
-RUN ls -la dist
+
+# verify
+RUN ls -la /app/client/dist
+RUN ls -la /app/dist
 
 
 EXPOSE 3001
