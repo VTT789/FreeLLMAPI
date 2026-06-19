@@ -1,4 +1,4 @@
-﻿{
+{
   "compilerOptions": {
     "paths": {
       "@freellmapi/shared/*": ["./shared/*"]
