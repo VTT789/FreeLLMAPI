@@ -10,9 +10,6 @@ COPY client/package*.json ./client/
 
 RUN npm install
 
-# Explicit install in server (ensures all deps are present)
-RUN cd server && npm install
-
 COPY . .
 
 # Build with esbuild – keep only native modules external
@@ -20,4 +17,6 @@ RUN npx esbuild server/src/index.ts --bundle --platform=node --target=node20 --o
 
 EXPOSE 3001
 
-CMD ["node", "dist/server.js"]
+# Set NODE_PATH to help resolve bare imports, and use specifier resolution
+ENV NODE_PATH=/app/node_modules:/app/server/node_modules
+CMD ["node", "--es-module-specifier-resolution=node", "dist/server.js"]
