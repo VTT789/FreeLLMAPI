@@ -12,9 +12,9 @@ RUN npm install
 
 COPY . .
 
-# Bundle all packages (including better-sqlite3)
-RUN npx esbuild server/src/index.ts --bundle --platform=node --target=node20 --outfile=dist/server.js --format=esm --loader:.ts=ts
+# Build with esbuild – output .cjs to match Render's Docker Command
+RUN npx esbuild server/src/index.ts --bundle --platform=node --target=node20 --outfile=dist/server.cjs --format=cjs --external:better-sqlite3 --external:socks-proxy-agent --loader:.ts=ts
 
 EXPOSE 3001
 
-CMD ["node", "dist/server.js"]
+CMD ["node", "dist/server.cjs"]
