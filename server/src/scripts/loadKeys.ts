@@ -6,10 +6,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const dbPath = path.resolve(__dirname, '../../../data/freeapi.db');
 
+console.log('🔄 Loading API keys from environment variables...');
+console.log('📁 Database path:', dbPath);
+console.log('🔑 GOOGLE_API_KEY exists?', !!process.env.GOOGLE_API_KEY);
+console.log('🔑 GROQ_API_KEY exists?', !!process.env.GROQ_API_KEY);
+
 function loadKeys() {
   try {
     const db = new Database(dbPath);
-    console.log('✅ Database connected for key loading');
+    console.log('✅ Database connected');
 
     const keys: Record<string, string> = {
       google: process.env.GOOGLE_API_KEY || '',
@@ -38,6 +43,8 @@ function loadKeys() {
         db.prepare('INSERT OR REPLACE INTO api_keys (provider, api_key) VALUES (?, ?)').run(provider, key);
         console.log(`✅ Inserted ${provider}`);
         count++;
+      } else {
+        console.log(`⚠️ No key found for ${provider}`);
       }
     }
 
