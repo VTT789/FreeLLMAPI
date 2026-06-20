@@ -13,9 +13,12 @@
     "test": "npm run test -w server && npm run test -w client --if-present",
     "desktop:dev": "npm run build -w client && npm --prefix desktop run dev",
     "desktop:dist": "npm run build -w client && npm --prefix desktop run dist",
-    "desktop:dist:win": "npm run build -w client && npm --prefix desktop run dist:win"
+    "desktop:dist:win": "npm run build -w client && npm --prefix desktop run dist:win",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "wrangler": "^4.102.0"
   }
 }
