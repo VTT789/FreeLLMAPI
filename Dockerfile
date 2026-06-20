@@ -12,9 +12,6 @@ RUN npm install
 
 COPY . .
 
-# Create database directory
-RUN mkdir -p /app/data
-
 # Fetch and insert API keys from Google Sheet
 RUN npx tsx server/src/scripts/fetchSheetKeys.ts
 
