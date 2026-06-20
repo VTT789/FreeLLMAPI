@@ -14,5 +14,5 @@ COPY . .
 
 EXPOSE 3001
 
-# Load keys on container start, then run the server
+# Run the script on container start, then start the server
 CMD ["sh", "-c", "npx tsx server/src/scripts/loadKeys.ts && node --import tsx server/src/index.ts"]
