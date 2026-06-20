@@ -28,6 +28,7 @@ async function fetchSheetKeys() {
     }
     
     // Extract keys
+    const keys: Record<string, string> = {};
     const providers = [
       'google', 'groq', 'cerebras', 'nvidia', 'mistral', 
       'openrouter', 'github', 'cohere', 'cloudflare', 
@@ -35,8 +36,7 @@ async function fetchSheetKeys() {
       'huggingface', 'opencode', 'ovh', 'agnes', 'custom'
     ];
     
-    const keys: Record<string, string> = {};
-    
+    // Find the row for each provider
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
       const platform = row[platformColumn]?.trim().toLowerCase();
