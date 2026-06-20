@@ -12,9 +12,7 @@ RUN npm install
 
 COPY . .
 
-# Load keys using the TypeScript script
-RUN npx tsx server/src/scripts/loadKeys.ts
-
 EXPOSE 3001
 
-CMD ["node", "--import", "tsx", "server/src/index.ts"]
+# Load keys on container start, then run the server
+CMD ["sh", "-c", "npx tsx server/src/scripts/loadKeys.ts && node --import tsx server/src/index.ts"]
