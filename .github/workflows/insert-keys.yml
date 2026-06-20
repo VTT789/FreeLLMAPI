@@ -1,0 +1,18 @@
+name: Insert API Keys
+
+on:
+  workflow_dispatch:  # Manual trigger only
+
+jobs:
+  insert-keys:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Insert keys into Render database
+        run: |
+          curl -X POST https://freellmapi-mmuc.onrender.com/api/keys \
+            -H "Content-Type: application/json" \
+            -d '{"provider":"google","apiKey":"AIzaSyAHokiOWr2O_Nhi5c9-O9k599DUaIHtqCI"}'
+          
+          curl -X POST https://freellmapi-mmuc.onrender.com/api/keys \
+            -H "Content-Type: application/json" \
+            -d '{"provider":"groq","apiKey":"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"}'
