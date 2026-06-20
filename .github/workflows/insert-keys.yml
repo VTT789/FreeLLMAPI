@@ -1,18 +1,30 @@
-name: Insert API Keys
+﻿name: Insert API Keys
 
 on:
-  workflow_dispatch:  # Manual trigger only
+  workflow_dispatch:
 
 jobs:
   insert-keys:
     runs-on: ubuntu-latest
     steps:
-      - name: Insert keys into Render database
+      - name: Insert Google API Key
         run: |
           curl -X POST https://freellmapi-mmuc.onrender.com/api/keys \
             -H "Content-Type: application/json" \
             -d '{"provider":"google","apiKey":"AIzaSyAHokiOWr2O_Nhi5c9-O9k599DUaIHtqCI"}'
-          
+
+      - name: Insert Groq API Key
+        run: |
           curl -X POST https://freellmapi-mmuc.onrender.com/api/keys \
             -H "Content-Type: application/json" \
             -d '{"provider":"groq","apiKey":"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"}'
+
+      - name: Insert Unified API Key
+        run: |
+          curl -X POST https://freellmapi-mmuc.onrender.com/api/keys/unified \
+            -H "Content-Type: application/json" \
+            -d '{"key":"freellmapi-unified-123"}'
+
+      - name: Verify Keys
+        run: |
+          curl https://freellmapi-mmuc.onrender.com/api/keys
