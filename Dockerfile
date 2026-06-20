@@ -1,4 +1,16 @@
-﻿# ... (your existing Dockerfile up to COPY . .) ...
+﻿FROM node:20-alpine
+
+RUN apk add --no-cache python3 make g++
+
+WORKDIR /app
+
+COPY package*.json ./
+COPY server/package*.json ./server/
+COPY client/package*.json ./client/
+
+RUN npm install
+
+COPY . .
 
 # Create data directory
 RUN mkdir -p /app/data
